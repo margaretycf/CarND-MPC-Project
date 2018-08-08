@@ -124,6 +124,23 @@ int main() {
           *
           */
 
+          // Handle latency
+          // predict next state to avoid Latency problems
+          // Latency of .1 seconds (100 ms)
+          double latency_dt = 0.1;
+          const double Lf = 2.67;
+          double x1=0, y1=0, psi1=0, v1=v, cte1=cte, epsi1=epsi;
+
+          x1 += v * cos(psi) * latency_dt;
+          y1 += v * sin(psi) * latency_dt;
+          //steer_value is negative
+          psi1 += - v * steer_value / Lf * latency_dt;
+          v1 += v + throttle_value * latency_dt;
+          cte1 += v * sin(epsi) * latency_dt;
+          //steer_value is negative
+          epsi1 += - v * steer_value / Lf * latency_dt;
+
+
           Eigen::VectorXd state(6);
           state << 0, 0, 0, v, cte, epsi;
 
@@ -159,8 +176,6 @@ int main() {
               mpc_y_vals.push_back(vars[i]);
             }
           }
-
-          double Lf = 2.67;
 
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.

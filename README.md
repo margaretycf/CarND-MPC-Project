@@ -21,9 +21,9 @@ The implememted vehicle model used in this project is a kinematic bicycle model.
 
 ### Timestep Length and Elapsed Duration (N & dt)
 
-The values I finally chose in my project for N and dt are 7 and 0.118, respectively. 
+The values I finally chose in my project for N and dt are 7 and 0.1, respectively. 
 
-Originally I used the Udacity's suggested N = 10 and dt = 0.1 for the project. I have adjusted either N or dt (by small amounts) and observed different behaviors, such as 10 / 0.5, 9 / 0.125, 6 / 0.35, and many others.
+Originally I used the Udacity's suggested N = 10 and dt = 0.1 for the project. I have adjusted either N or dt (by small amounts) and observed different behaviors, such as 10 / 0.5, 9 / 0.125, 6 / 0.35, 7 / 0.118 and many others.
 
 ### Polynomial Fitting and MPC Preprocessing
 
@@ -48,6 +48,23 @@ After this preprocessing, the helper function polyfit is called for polynomial f
 In a real car, an actuation command won't execute instantly - there will be a delay as the command propagates through the system. A realistic delay might be on the order of 100 milliseconds.
 
 The implemented project set 100ms for latency to mimic real driving conditions.
+```
+          // Handle latency
+          // predict next state to avoid Latency problems
+          // Latency of .1 seconds (100 ms)
+          double latency_dt = 0.1;
+          const double Lf = 2.67;
+          double x1=0, y1=0,  psi1=0, v1=v, cte1=cte, epsi1=epsi;
+
+          x1 += v * cos(psi) * latency_dt;
+          y1 += v * sin(psi) * latency_dt;
+          //steer_value is negative
+          psi1 += - v * steer_value / Lf * latency_dt;
+          v1 += v + throttle_value * latency_dt;
+          cte1 += v * sin(epsi) * latency_dt;
+          //steer_value is negative
+          epsi1 += - v * steer_value / Lf * latency_dt;
+```
 
 ---
 
