@@ -6,7 +6,7 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 7;
+size_t N = 10;
 double dt = 0.1;
 
 // This value assumes the model presented in the classroom is used.
@@ -23,7 +23,7 @@ const double Lf = 2.67;
 
 double ref_cte = 0;
 double ref_epsi = 0;
-double ref_v = 70;
+double ref_v = 100;
 
 size_t x_start = 0;
 size_t y_start = x_start + N;
@@ -57,21 +57,21 @@ class FG_eval {
     
     // The part of the cost based on the reference state.
     for (int i = 0; i < N; i++) {
-      fg[0] += 100 * CppAD::pow(vars[cte_start + i] - ref_cte, 2);
-      fg[0] += 100 * CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
+      fg[0] += 1000 * CppAD::pow(vars[cte_start + i] - ref_cte, 2);
+      fg[0] += 1000 * CppAD::pow(vars[epsi_start + i] - ref_epsi, 2);
       fg[0] += CppAD::pow(vars[v_start + i] - ref_v, 2);
     }
 
     // Minimize the use of actuators.
     for (int i = 0; i < N - 1; i++) {
-      fg[0] += 500 * CppAD::pow(vars[delta_start + i], 2);
-      fg[0] += 100 * CppAD::pow(vars[a_start + i], 2);
+      fg[0] += 55 * CppAD::pow(vars[delta_start + i], 2);
+      fg[0] += 55 * CppAD::pow(vars[a_start + i], 2);
     }
 
     // Minimize the value gap between sequential actuations.
     for (int i = 0; i < N - 2; i++) {
-      fg[0] += 1000 * CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
-      fg[0] += CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
+      fg[0] += 300000 * CppAD::pow(vars[delta_start + i + 1] - vars[delta_start + i], 2);
+      fg[0] += 3000 * CppAD::pow(vars[a_start + i + 1] - vars[a_start + i], 2);
     } 
 
 
@@ -133,17 +133,10 @@ class FG_eval {
       // TODO: Setup the rest of the model constraints
       fg[1 + x_start + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
       fg[1 + y_start + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
-      fg[1 + psi_start + t] = psi1 - (psi0 + v0 * delta0 / Lf * dt);
-      //fg[1 + psi_start + t] = psi1 - (psi0 - v0 * delta0 / Lf * dt);
+      fg[1 + psi_start + t] = psi1 - (psi0 - v0 * delta0 / Lf * dt);
       fg[1 + v_start + t] = v1 - (v0 + a0 * dt);
-
-
-      //fg[1 + cte_start + t] = cte1 - (polyeval(x0) - y0 + v0 * CppAD::sin(epsi0) * dt);
-      //fg[1 + epsi_start + t] = epsi1 - (psi0 - CppAD::atan(derivative(x0)) + v0 * delta0 * dt / Lf);
-
       fg[1 + cte_start + t] = cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
-      fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) + v0 * delta0 / Lf * dt);
-      //fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) - v0 * delta0 / Lf * dt);
+      fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) - v0 * delta0 / Lf * dt);
     }
 
   }
@@ -157,7 +150,7 @@ MPC::~MPC() {}
 
 vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   bool ok = true;
-  size_t i;
+  //size_t i;
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
   double x = state[0];
@@ -199,8 +192,10 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // degrees (values in radians).
   // NOTE: Feel free to change this to something else.
   for (int i = delta_start; i < a_start; i++) {
-    vars_lowerbound[i] = -0.436332 * Lf; 
-    vars_upperbound[i] = 0.436332 * Lf;
+    //vars_lowerbound[i] = -0.436332 * Lf; 
+    //vars_upperbound[i] = 0.436332 * Lf;
+    vars_lowerbound[i] = -0.436332; 
+    vars_upperbound[i] = 0.436332;
   }
 
   // Acceleration/decceleration upper and lower limits.
@@ -286,7 +281,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   result.push_back(solution.x[delta_start]);
   result.push_back(solution.x[a_start]);
 
-  for (int i = 0; i < N - 1; i++) {
+  for (int i = 0; i < N - 2; i++) {
     result.push_back(solution.x[x_start + i + 1]);
     result.push_back(solution.x[y_start + i + 1]);
   }

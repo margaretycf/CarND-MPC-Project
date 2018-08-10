@@ -21,9 +21,9 @@ The implememted vehicle model used in this project is a kinematic bicycle model.
 
 ### Timestep Length and Elapsed Duration (N & dt)
 
-The values I finally chose in my project for N and dt are 7 and 0.1, respectively. 
+The values I finally chose in my project for N and dt are 10 and 0.1, respectively. 
 
-Originally I used the Udacity's suggested N = 10 and dt = 0.1 for the project. I have adjusted either N or dt (by small amounts) and observed different behaviors, such as 10 / 0.5, 9 / 0.125, 6 / 0.35, 7 / 0.118 and many others.
+Firstly I started with the Udacity's suggested N = 10 and dt = 0.1 for the project. Then I adjusted either N or dt (by small amounts) and observed different behaviors, such as 10 / 0.5, 9 / 0.125, 6 / 0.35, 7 / 0.118 , 8 / 0.1, 7 / 0.1 and many others.
 
 ### Polynomial Fitting and MPC Preprocessing
 
@@ -54,16 +54,24 @@ The implemented project set 100ms for latency to mimic real driving conditions.
           // Latency of .1 seconds (100 ms)
           double latency_dt = 0.1;
           const double Lf = 2.67;
-          double x1=0, y1=0,  psi1=0, v1=v, cte1=cte, epsi1=epsi;
+          
+          // Initial state
+          double x0 = 0;
+          double y0 = 0;
+          double psi0 = 0;
+          double v0 = v;
+          double cte0 = coeffs[0];
+          double epsi0 = -atan(coeffs[1]);
 
-          x1 += v * cos(psi) * latency_dt;
-          y1 += v * sin(psi) * latency_dt;
+          // State after delay
+          double x1 = x0 + v0 * cos(psi0) * latency_dt;
+          double y1 = y0 + v0 * sin(psi0) * latency_dt;
           //steer_value is negative
-          psi1 += - v * steer_value / Lf * latency_dt;
-          v1 += v + throttle_value * latency_dt;
-          cte1 += v * sin(epsi) * latency_dt;
+          double psi1 = psi0 - v0 * steer_value / Lf * latency_dt;
+          double v1 = v0 + throttle_value * latency_dt;
+          double cte1 = cte0 + v0 * sin(epsi0) * latency_dt;
           //steer_value is negative
-          epsi1 += - v * steer_value / Lf * latency_dt;
+          double epsi1 = epsi0 - v0 * atan(coeffs[1]) / Lf * latency_dt;
 ```
 
 ---
