@@ -25,6 +25,10 @@ The values I finally chose in my project for N and dt are 10 and 0.1, respective
 
 Firstly I started with the Udacity's suggested N = 10 and dt = 0.1 for the project. Then I adjusted either N or dt (by small amounts) and observed different behaviors, such as 10 / 0.5, 9 / 0.125, 6 / 0.35, 7 / 0.118 , 8 / 0.1, 7 / 0.1 and many others.
 
+I decided to keep N = 10 and dt = 0.1 in my project, because they are good to keep car on trail and have good performance. I tuned other parameters based on these two values to be able to have the car drives smoothly on track.
+
+The value of time horizon ```N * dt``` is the key to get predicted path accurately. Value of ```10 * 0.1``` gives a good prediction in my experiments. Smaller dt will give better accuracy but that will require higher N for the same horizon. However, increase N will result in longer computational time which effectively increase the latency. The most common choice of values is N=10 and dt=0.1.
+ 
 ### Polynomial Fitting and MPC Preprocessing
 
 Before polynomial fitting the path returned from the simulator, we preprocess the points to move them to the origin (x, y) and also rotate the angle to align the car orientation:

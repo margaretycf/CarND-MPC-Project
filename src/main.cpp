@@ -142,7 +142,7 @@ int main() {
           double v1 = v0 + throttle_value * latency_dt;
           double cte1 = cte0 + v0 * sin(epsi0) * latency_dt;
           //steer_value is negative
-          double epsi1 = epsi0 - v0 * atan(coeffs[1]) / Lf * latency_dt;
+          double epsi1 = epsi0 - v0 * steer_value / Lf * latency_dt;
 
 
 
